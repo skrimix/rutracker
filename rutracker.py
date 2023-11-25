@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Module allows communicating with rutracker.net (mirror of rutracker.org)
+"""Module allows communicating with rutracker.org
 
-You can search the tracker, get topic info text and download torrent files from rutracker.net
-(rutracker.org or any other official mirror should work as well)
+You can search the tracker, get topic info text and download torrent files from rutracker.org
 """
 
 import logging
@@ -25,7 +24,7 @@ class Rutracker:
     - get_torrent (download .torrent file for the specified topic)
     """
 
-    def __init__(self, login, password, tracker_url='https://rutracker.net/', logging_mode='', proxies={}):
+    def __init__(self, login, password, tracker_url='https://rutracker.org/', logging_mode='', proxies={}):
         """Create an instance of Rutracker class
 
         Required arguments:
@@ -33,7 +32,7 @@ class Rutracker:
         - password (your rutracker password)
 
         Optional arguments:
-        - tracker_url (mirror url, 'https://rutracker.net/' by default)
+        - tracker_url (mirror url, 'https://rutracker.org/' by default)
         - logging_mode ('console' or 'file', disabled by default)
         - proxies in requests format:
             for https proxy:
@@ -41,7 +40,7 @@ class Rutracker:
             for socks proxy (you will also need requests[socks] package installed):
                 {'https': 'socks5://user:pass@host:port'}
 
-        Init will establish connection with rutracker.net or will raise an exception. You may be
+        Init will establish connection with rutracker.org or will raise an exception. You may be
         prompted to solve captcha during the first use. The captcha image will be saved as
         'captcha.jpg' in the working directry. After successful login, init will save cookies data
         to 'rt_cookies.txt' in the working directory. This data will be reused during the next
@@ -189,6 +188,18 @@ class Rutracker:
         description = soup.find('div', {'class': 'post_body'}).extract()
 
         return description.get_text()
+    
+    def get_magnet(self, topic_id):
+        """Get magnet link
+
+        IN: Topic_id
+        OUT: Magnet link
+        """
+        raw = self._ask_tracker('viewtopic', topic_id=str(topic_id))
+        soup = BeautifulSoup(raw, 'html.parser')
+        magnet = soup.find('a', {'class': 'magnet-link'}).get('href')
+        
+        return magnet
 
     def get_torrent(self, topic_id, name='', path=''):
         """Get torrent file
